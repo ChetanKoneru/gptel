@@ -357,10 +357,13 @@ for details.  This implementation handles the OpenAI Responses API."
 Returns prompts in Responses API format with function_call_output items."
   (mapcar
    (lambda (tool-call)
-     (list
-      :type "function_call_output"
-      :call_id (plist-get tool-call :id)
-      :output (plist-get tool-call :result)))
+     (let ((result (plist-get tool-call :result)))
+       (list
+        :type "function_call_output"
+        :call_id (plist-get tool-call :id)
+        :output (if (or (stringp result) (vectorp result))
+                    result
+                  (gptel--to-string result)))))
    tool-use))
 
 (cl-defmethod gptel--inject-prompt
